@@ -3,11 +3,7 @@ package naivepool
 import (
 	"context"
 	"fmt"
-	"os"
-	"os/signal"
 	"sync"
-	"syscall"
-	"time"
 )
 
 // jobFunc represents the function that will be executed by workers.
