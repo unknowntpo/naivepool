@@ -2,7 +2,6 @@ package naivepool
 
 import (
 	"context"
-	"fmt"
 	"sync"
 )
 
