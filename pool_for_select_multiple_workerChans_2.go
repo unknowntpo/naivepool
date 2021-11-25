@@ -1,5 +1,8 @@
-// +build for_select_multiple_workerChans
+// +build for_select_multiple_workerChans_2
 
+// This version of naivepool uses for-select loop to receive a job from Pool.jobChan,
+// and pop a workerChan from Pool.workers, send the job to it.
+// The worker use for-range loop to receive job from Pool until channel is closed.
 package naivepool
 
 import (
@@ -40,7 +43,7 @@ func (p *Pool) Start(ctx context.Context) {
 		w := NewWorker(p.workerChanSize)
 		// set up channel between pool and worker
 		p.workers <- w.c
-		go w.work(ctx, &p.wg)
+		go w.work(&p.wg)
 	}
 
 	go func() {
@@ -56,6 +59,11 @@ func (p *Pool) Start(ctx context.Context) {
 				// put him back to p.workers
 				p.workers <- wc
 			case <-ctx.Done():
+				// for each workerChan in workers
+				// close them to inform worker that they need to retire.
+				for wc := range p.workers {
+					close(wc)
+				}
 				close(p.workers)
 				return
 			}
@@ -90,14 +98,9 @@ func NewWorker(chanSize int) worker {
 }
 
 // worker is the worker that execute the job received from p.workerChan.
-func (w *worker) work(ctx context.Context, wg *sync.WaitGroup) {
+func (w *worker) work(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for {
-		select {
-		case f := <-w.c:
-			f()
-		case <-ctx.Done():
-			return
-		}
+	for f := range w.c {
+		f()
 	}
 }
