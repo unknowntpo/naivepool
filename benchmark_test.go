@@ -4,12 +4,14 @@ import (
 	"context"
 	"sync"
 	"testing"
+
+	"github.com/alitto/pond"
 )
 
 func BenchmarkFib(b *testing.B) {
 	numJobs := 1000
 
-	fibNum := 80
+	fibNum := 10000
 
 	b.Run("fib", func(b *testing.B) {
 		fib := func() {
@@ -33,7 +35,7 @@ func BenchmarkFib(b *testing.B) {
 		var wg sync.WaitGroup
 
 		maxWorkers := 4
-		workerChanSize := 20
+		workerChanSize := 200
 
 		fib := func() {
 			n := fibNum
