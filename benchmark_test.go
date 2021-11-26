@@ -97,4 +97,38 @@ func BenchmarkFib(b *testing.B) {
 		}
 		b.StopTimer()
 	})
+
+	b.Run("pond", func(b *testing.B) {
+		var wg sync.WaitGroup
+
+		fib := func() {
+			n := fibNum
+			cur := 1
+			pre := 0
+			res := 1
+			for i := 1; i < n; i++ {
+				res = pre + cur
+				pre = cur
+				cur = res
+			}
+			wg.Done()
+		}
+
+		// Create a buffered (non-blocking) pool that can scale up to 100 workers
+		// and has a buffer capacity of 1000 tasks
+		pool := pond.New(100, 1000)
+
+		b.ResetTimer()
+		b.StartTimer()
+
+		for i := 0; i < b.N; i++ {
+			for j := 0; j < numJobs; j++ {
+				wg.Add(1)
+				pool.Submit(fib)
+			}
+			wg.Wait()
+		}
+		b.StopTimer()
+	})
+
 }
