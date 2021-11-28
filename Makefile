@@ -29,3 +29,8 @@ bench/for_select_multiple_workerChans_2:
 .PHONY: bench/no_jobChan_1
 bench/no_jobChan_1:
 	@go test -v --tags=no_jobChan_1 --bench=. -benchmem
+
+## bench/no_jobChan_2: benchmark pool which doesn't have jobChan, and all workers share a single workerChan: for-range, worker: for-range pattern
+.PHONY: bench/no_jobChan_2
+bench/no_jobChan_2:
+	@go test -v --tags=no_jobChan_2 --bench=. -benchmem
