@@ -1,5 +1,3 @@
-// +build for_select_go_work
-
 package naivepool
 
 import (
@@ -17,7 +15,8 @@ type Pool struct {
 }
 
 // New inits goroutine pool with capacity of jobchan and workerchan.
-func New(maxJobs, maxWorkers, workerChanSize int) *Pool {
+// maxJobs means the maximum number of jobs inside the buffer.
+func New(maxJobs, maxWorkers int) *Pool {
 	p := &Pool{
 		jobChan:   make(chan jobFunc, maxJobs),
 		tokenChan: make(chan struct{}, maxWorkers),
