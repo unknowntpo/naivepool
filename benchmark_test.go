@@ -26,18 +26,19 @@ func BenchmarkNaivepool(b *testing.B) {
 	b.Run("fib", func(b *testing.B) {
 		tests := []struct {
 			name       string
-			maxJobs    int
+			numJobs    int
+			bufSize    int
 			maxWorkers int
 		}{
-			{"1K tasks", 1000, 8},
-			{"10K tasks", 10000, 8},
-			{"100K tasks", 100000, 8},
-			{"1M tasks", 1000000, 8},
+			{"1K tasks", 1000, 1000, 8},
+			{"10K tasks", 10000, 1000, 8},
+			{"100K tasks", 100000, 1000, 8},
+			{"1M tasks", 1000000, 1000, 8},
 		}
 
 		for _, tt := range tests {
 			b.Run(tt.name, func(b *testing.B) {
-				pool := New(tt.maxJobs, tt.maxWorkers)
+				pool := New(tt.bufSize, tt.maxWorkers)
 				ctx, cancel := context.WithCancel(context.Background())
 
 				pool.Start(ctx)
@@ -51,7 +52,7 @@ func BenchmarkNaivepool(b *testing.B) {
 				}
 
 				for i := 0; i < b.N; i++ {
-					for j := 0; j < tt.maxJobs; j++ {
+					for j := 0; j < tt.numJobs; j++ {
 						wg.Add(1)
 						pool.Schedule(f)
 					}

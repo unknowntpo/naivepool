@@ -15,10 +15,10 @@ type Pool struct {
 }
 
 // New inits goroutine pool with capacity of jobchan and workerchan.
-// maxJobs means the maximum number of jobs inside the buffer.
-func New(maxJobs, maxWorkers int) *Pool {
+// bufSize means the maximum number of jobs inside the buffer.
+func New(bufSize, maxWorkers int) *Pool {
 	p := &Pool{
-		jobChan:   make(chan jobFunc, maxJobs),
+		jobChan:   make(chan jobFunc, bufSize),
 		tokenChan: make(chan struct{}, maxWorkers),
 	}
 
