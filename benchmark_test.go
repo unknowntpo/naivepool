@@ -2,6 +2,8 @@ package naivepool
 
 import (
 	"context"
+	"fmt"
+	"io"
 	"sync"
 	"testing"
 
@@ -20,6 +22,11 @@ func fib() {
 		pre = cur
 		cur = res
 	}
+}
+
+// Simulate an IO Bound task.
+func print() {
+	fmt.Fprint(io.Discard, "OK")
 }
 
 func BenchmarkNaivepool(b *testing.B) {
@@ -49,6 +56,47 @@ func BenchmarkNaivepool(b *testing.B) {
 				f := func() {
 					defer wg.Done()
 					fib()
+				}
+
+				for i := 0; i < b.N; i++ {
+					for j := 0; j < tt.numJobs; j++ {
+						wg.Add(1)
+						pool.Schedule(f)
+					}
+					wg.Wait()
+				}
+
+				cancel()
+				pool.Wait()
+			})
+		}
+	})
+	b.Run("print", func(b *testing.B) {
+		tests := []struct {
+			name       string
+			numJobs    int
+			bufSize    int
+			maxWorkers int
+		}{
+			{"1K tasks", 1000, 1000, 8},
+			{"10K tasks", 10000, 1000, 8},
+			{"100K tasks", 100000, 1000, 8},
+			{"1M tasks", 1000000, 1000, 8},
+		}
+
+		for _, tt := range tests {
+			b.Run(tt.name, func(b *testing.B) {
+				pool := New(tt.bufSize, tt.maxWorkers)
+				ctx, cancel := context.WithCancel(context.Background())
+
+				pool.Start(ctx)
+
+				b.ResetTimer()
+
+				var wg sync.WaitGroup
+				f := func() {
+					defer wg.Done()
+					print()
 				}
 
 				for i := 0; i < b.N; i++ {
@@ -97,6 +145,37 @@ func BenchmarkNormalGoroutine(b *testing.B) {
 			})
 		}
 	})
+	b.Run("print", func(b *testing.B) {
+		tests := []struct {
+			name    string
+			numJobs int
+		}{
+			{"1K tasks", 1000},
+			{"10K tasks", 10000},
+			{"100K tasks", 100000},
+			{"1M tasks", 1000000},
+		}
+
+		for _, tt := range tests {
+			b.Run(tt.name, func(b *testing.B) {
+				var wg sync.WaitGroup
+				f := func() {
+					defer wg.Done()
+					print()
+				}
+
+				b.ResetTimer()
+				for i := 0; i < b.N; i++ {
+					for j := 0; j < tt.numJobs; j++ {
+						wg.Add(1)
+						go f()
+					}
+					wg.Wait()
+				}
+			})
+		}
+	})
+
 }
 
 func BenchmarkPond(b *testing.B) {
@@ -135,6 +214,43 @@ func BenchmarkPond(b *testing.B) {
 			})
 		}
 	})
+
+	b.Run("print", func(b *testing.B) {
+		tests := []struct {
+			name       string
+			numJobs    int
+			maxWorkers int
+		}{
+			{"1K tasks", 1000, 100},
+			{"10K tasks", 10000, 100},
+			{"100K tasks", 100000, 100},
+			{"1M tasks", 1000000, 100},
+		}
+
+		for _, tt := range tests {
+			b.Run(tt.name, func(b *testing.B) {
+				// Create a buffered (non-blocking) pool that can scale up to tt.maxWorkers workers
+				// and has a buffer capacity of tt.numJobs tasks
+				pool := pond.New(tt.maxWorkers, tt.numJobs)
+
+				var wg sync.WaitGroup
+				f := func() {
+					defer wg.Done()
+					print()
+				}
+
+				b.ResetTimer()
+				for i := 0; i < b.N; i++ {
+					for j := 0; j < tt.numJobs; j++ {
+						wg.Add(1)
+						pool.Submit(f)
+					}
+					wg.Wait()
+				}
+			})
+		}
+	})
+
 }
 
 /*
