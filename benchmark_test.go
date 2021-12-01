@@ -43,13 +43,13 @@ func BenchmarkNaivepool(b *testing.B) {
 				pool.Start(ctx)
 
 				b.ResetTimer()
-				b.StartTimer()
 
 				var wg sync.WaitGroup
 				f := func() {
 					defer wg.Done()
 					fib()
 				}
+
 				for i := 0; i < b.N; i++ {
 					for j := 0; j < tt.maxJobs; j++ {
 						wg.Add(1)
@@ -57,7 +57,7 @@ func BenchmarkNaivepool(b *testing.B) {
 					}
 					wg.Wait()
 				}
-				b.StopTimer()
+
 				cancel()
 				pool.Wait()
 			})
@@ -79,14 +79,13 @@ func BenchmarkNormalGoroutine(b *testing.B) {
 
 		for _, tt := range tests {
 			b.Run(tt.name, func(b *testing.B) {
-				b.ResetTimer()
-				b.StartTimer()
-
 				var wg sync.WaitGroup
 				f := func() {
 					defer wg.Done()
 					fib()
 				}
+
+				b.ResetTimer()
 				for i := 0; i < b.N; i++ {
 					for j := 0; j < tt.numJobs; j++ {
 						wg.Add(1)
@@ -94,7 +93,6 @@ func BenchmarkNormalGoroutine(b *testing.B) {
 					}
 					wg.Wait()
 				}
-				b.StopTimer()
 			})
 		}
 	})
@@ -119,14 +117,13 @@ func BenchmarkPond(b *testing.B) {
 				// and has a buffer capacity of tt.numJobs tasks
 				pool := pond.New(tt.maxWorkers, tt.numJobs)
 
-				b.ResetTimer()
-				b.StartTimer()
-
 				var wg sync.WaitGroup
 				f := func() {
 					defer wg.Done()
 					fib()
 				}
+
+				b.ResetTimer()
 				for i := 0; i < b.N; i++ {
 					for j := 0; j < tt.numJobs; j++ {
 						wg.Add(1)
@@ -134,7 +131,6 @@ func BenchmarkPond(b *testing.B) {
 					}
 					wg.Wait()
 				}
-				b.StopTimer()
 			})
 		}
 	})
