@@ -11,7 +11,7 @@ import (
 func BenchmarkFib(b *testing.B) {
 	numJobs := 1000
 
-	fibNum := 10000
+	fibNum := 10
 
 	b.Run("fib", func(b *testing.B) {
 		fib := func() {
