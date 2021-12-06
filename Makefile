@@ -10,7 +10,7 @@ help:
 	@echo 'Usage:'
 	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' |  sed -e 's/^/ /'
 
-## benchmark/naivepool: benchmark naivepool
+## bench/naivepool: benchmark naivepool
 .PHONY: bench/naivepool
 bench/naivepool:
 	@go test -v --bench=. -benchmem
