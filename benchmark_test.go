@@ -278,7 +278,7 @@ func BenchmarkPond(b *testing.B) {
 				var wg sync.WaitGroup
 				f := func() {
 					defer wg.Done()
-					fib()
+					adder()
 				}
 
 				b.ResetTimer()
