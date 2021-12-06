@@ -13,14 +13,13 @@ help:
 ## bench/naivepool/different-impl: benchmark all tests of naivepool between different implementation.
 .PHONY: bench/naivepool/different-impl
 bench/naivepool/different-impl:
-	@mkdir -p /tmp/naivepool
 	@echo "Running benchmark between different implementation of naivepool..."
-	@git checkout feat-pool-go-work && make bench/naivepool/all > /tmp/naivepool/go-work.txt
-	@git checkout feat-dispatcher-for-select-worker-for-select && make bench/naivepool/all > /tmp/naivepool/for-select-for-select.txt
-	@git checkout feat-dispatcher-for-select-worker-for-range && make bench/naivepool/all > /tmp/naivepool/for-select-for-range.txt
-	@git checkout feat-no-jobChan-with-for-range-worker && make bench/naivepool/all > /tmp/naivepool/no-jobChan-for-range-worker.txt
+	@git checkout feat-pool-go-work && make bench/naivepool/all > go-work
+	@git checkout feat-dispatcher-for-select-worker-for-select && make bench/naivepool/all > for-select-for-select
+	@git checkout feat-dispatcher-for-select-worker-for-range && make bench/naivepool/all > for-select-for-range
+	@git checkout feat-no-jobChan-with-for-range-worker && make bench/naivepool/all > no-jobChan-for-range-worker
 	@git checkout master
-	@benchstat -html /tmp/naivepool/no-jobChan-for-range-worker.txt /tmp/naivepool/for-select-for-range.txt /tmp/naivepool/for-select-for-select.txt /tmp/naivepool/go-work.txt > output.html
+	@benchstat -html no-jobChan-for-range-worker for-select-for-range for-select-for-select go-work > output.html
 
 ## bench/naivepool/all: benchmark all tests of naivepool
 .PHONY: bench/naivepool/all
