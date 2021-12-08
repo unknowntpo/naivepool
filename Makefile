@@ -14,12 +14,16 @@ help:
 .PHONY: bench/naivepool/different-impl
 bench/naivepool/different-impl:
 	@echo "Running benchmark between different implementation of naivepool..."
+	@go test -v --bench=BenchmarkNormalGoroutine > normal-goroutine
+	@go test -v --bench=BenchmarkPond > pond
 	@git checkout feat-pool-go-work && make bench/naivepool/all > go-work
 	@git checkout feat-dispatcher-for-select-worker-for-select && make bench/naivepool/all > for-select-for-select
 	@git checkout feat-dispatcher-for-select-worker-for-range && make bench/naivepool/all > for-select-for-range
 	@git checkout feat-no-jobChan-with-for-range-worker && make bench/naivepool/all > no-jobChan-for-range-worker
 	@git checkout master
 	@benchstat -html no-jobChan-for-range-worker for-select-for-range for-select-for-select go-work > output.html
+	@benchstat -html no-jobChan-for-range-worker normal-goroutine pond > cmp-normal-pond.html
+
 
 ## bench/naivepool/all: benchmark all tests of naivepool
 .PHONY: bench/naivepool/all
