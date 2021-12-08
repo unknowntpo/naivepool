@@ -50,7 +50,6 @@ func (p *Pool) Start(ctx context.Context) {
 			case job := <-p.jobChan:
 				p.workerChan <- job
 			case <-ctx.Done():
-				close(p.workerChan)
 				return
 			}
 		}
