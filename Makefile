@@ -14,15 +14,14 @@ help:
 .PHONY: plot
 plot:
 	@echo "Post processing the data..."
-	#@cat go-work
-	#BenchmarkNaivepool/simple_task/1K_tasks-4
 	@sed -n -E 's/BenchmarkNaivepool\/(.*)-[0-9]+/\1/p' go-work.dat | column -t -s ' ' | awk '{print $$1, $$3}' > go-work-final.dat
 	@sed -n -E 's/BenchmarkNaivepool\/(.*)-[0-9]+/\1/p' for-select-for-select.dat | column -t -s ' ' | awk '{print $$1, $$3}' > for-select-for-select-final.dat
 	@sed -n -E 's/BenchmarkNaivepool\/(.*)-[0-9]+/\1/p' for-select-for-range.dat | column -t -s ' ' | awk '{print $$1, $$3}' > for-select-for-range-final.dat
 	@sed -n -E 's/BenchmarkNaivepool\/(.*)-[0-9]+/\1/p' no-jobChan-for-range-worker.dat | column -t -s ' ' | awk '{print $$1, $$3}' > no-jobChan-for-range-worker-final.dat
 	@echo "Done post processing.\n"
 	@echo "plotting data with gnuplot..."
-	#TODO: plot with gnuplot
+	@gnuplot -c plot.gp
+	@echo "Done!"
 
 ## bench/naivepool/different-impl: benchmark all tests of naivepool between different implementation.
 .PHONY: bench/naivepool/different-impl
