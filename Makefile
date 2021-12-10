@@ -14,10 +14,12 @@ help:
 .PHONY: plot
 plot:
 	@echo "Post processing the data..."
-	@sed -n -E 's/BenchmarkNaivepool\/(.*)_\w+-[0-9]+/\1/p' go-work.dat | column -t -s ' ' | awk '{print $$1, $$3}' > go-work-final.dat
-	@sed -n -E 's/BenchmarkNaivepool\/(.*)_\w+-[0-9]+/\1/p' for-select-for-select.dat | column -t -s ' ' | awk '{print $$1, $$3}' > for-select-for-select-final.dat
-	@sed -n -E 's/BenchmarkNaivepool\/(.*)_\w+-[0-9]+/\1/p' for-select-for-range.dat | column -t -s ' ' | awk '{print $$1, $$3}' > for-select-for-range-final.dat
-	@sed -n -E 's/BenchmarkNaivepool\/(.*)_\w+-[0-9]+/\1/p' no-jobChan-for-range-worker.dat | column -t -s ' ' | awk '{print $$1, $$3}' > no-jobChan-for-range-worker-final.dat
+	# simple_task/1K
+	# BenchmarkNaivepool/simple_task/1K_tasks-4
+	@sed -n -E 's/BenchmarkNaivepool\/.*\/(.*)_\w+-[0-9]+/\1/p' go-work.dat | column -t -s ' ' | awk '{print $$1, $$3}' > go-work-final.dat
+	@sed -n -E 's/BenchmarkNaivepool\/.*\/(.*)_\w+-[0-9]+/\1/p' for-select-for-select.dat | column -t -s ' ' | awk '{print $$1, $$3}' > for-select-for-select-final.dat
+	@sed -n -E 's/BenchmarkNaivepool\/.*\/(.*)_\w+-[0-9]+/\1/p' for-select-for-range.dat | column -t -s ' ' | awk '{print $$1, $$3}' > for-select-for-range-final.dat
+	@sed -n -E 's/BenchmarkNaivepool\/.*\/(.*)_\w+-[0-9]+/\1/p' no-jobChan-for-range-worker.dat | column -t -s ' ' | awk '{print $$1, $$3}' > no-jobChan-for-range-worker-final.dat
 	@echo "Done post processing.\n"
 	@echo "plotting data with gnuplot..."
 	@gnuplot -c plot.gp
