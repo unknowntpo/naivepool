@@ -3,22 +3,23 @@ package naivepool
 import (
 	"context"
 	"sync"
+
+	"github.com/unknowntpo/naivepool/domain"
 )
 
-// jobFunc represents the function that will be executed by workers.
-type jobFunc func()
+// domain.JobFunc represents the function that will be executed by workers.
 
-type Pool struct {
-	jobChan   chan jobFunc   // We use jobChan to communicate between caller of Pool and Pool.
-	tokenChan chan struct{}  //  token controls the maximum amount of workers inside Pool.
-	wg        sync.WaitGroup // Use waitgroup to wait for workers done its job and retire.
+type poolForRange struct {
+	jobChan   chan domain.JobFunc // We use jobChan to communicate between caller of Pool and Pool.
+	tokenChan chan struct{}       //  token controls the maximum amount of workers inside Pool.
+	wg        sync.WaitGroup      // Use waitgroup to wait for workers done its job and retire.
 }
 
 // New inits goroutine pool with capacity of jobchan and workerchan.
 // bufSize means the maximum number of jobs inside the buffer.
-func New(bufSize, maxWorkers int) *Pool {
-	p := &Pool{
-		jobChan:   make(chan jobFunc, bufSize),
+func New(bufSize, maxWorkers int) *poolForRange {
+	p := &poolForRange{
+		jobChan:   make(chan domain.JobFunc, bufSize),
 		tokenChan: make(chan struct{}, maxWorkers),
 	}
 
@@ -26,7 +27,7 @@ func New(bufSize, maxWorkers int) *Pool {
 }
 
 // Start starts dispatching jobs to workers.
-func (p *Pool) Start(ctx context.Context) {
+func (p *poolForRange) Start(ctx context.Context) {
 	// Fill the tokenChan with maxWorkers
 	for i := 0; i < cap(p.tokenChan); i++ {
 		p.tokenChan <- struct{}{}
@@ -50,16 +51,16 @@ func (p *Pool) Start(ctx context.Context) {
 }
 
 // Wait waits for all workers finish its job and retire.
-func (p *Pool) Wait() {
+func (p *poolForRange) Wait() {
 	p.wg.Wait()
 }
 
 // Schedule sends the job the p.jobChan.
-func (p *Pool) Schedule(job jobFunc) {
+func (p *poolForRange) Schedule(job domain.JobFunc) {
 	p.jobChan <- job
 }
 
-func (p *Pool) work(job jobFunc) {
+func (p *poolForRange) work(job domain.JobFunc) {
 	defer func() {
 		// Add back one token
 		p.tokenChan <- struct{}{}
